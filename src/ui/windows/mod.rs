@@ -1,6 +1,6 @@
 mod loading_window;
 mod main_window;
-mod create_wine_profile;
+mod profiles_window;
 
 pub use loading_window::{
     LoadingWindow,
