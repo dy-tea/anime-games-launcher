@@ -1,5 +1,5 @@
 use adw::prelude::*;
-use relm4::prelude::*;
+use relm4::{prelude::*, binding::*};
 
 pub mod component_page;
 use component_page::*;
@@ -9,7 +9,9 @@ pub struct CreateWineProfileApp {
     window: adw::PreferencesWindow,
     wine_page: AsyncController<ComponentPage>,
     dxvk_page: AsyncController<ComponentPage>,
-    container_page: AsyncController<ComponentPage>
+    container_page: AsyncController<ComponentPage>,
+
+    is_native: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -19,7 +21,9 @@ pub enum CreateWineProfileAppMsg {
     },
     OpenWinePage,
     OpenDxvkPage,
-    OpenContainerPage
+    OpenContainerPage,
+
+    SetNative(bool),
 }
 
 #[relm4::component(pub, async)]
@@ -59,10 +63,18 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
 
                     adw::SwitchRow {
                         set_title: "Native Linux",
+                        #[watch]
+                        set_active: model.is_native,
+                        connect_active_notify[sender] => move |switch| {
+                            sender.input(CreateWineProfileAppMsg::SetNative(switch.is_active()));
+                        }
                     },
 
                     adw::ActionRow {
                         set_title: "Wine",
+                        #[watch]
+                        set_visible: !model.is_native,
+
                         add_suffix = &gtk::Label {
                             set_text: "Wine-Staging-TkG 9.8"
                         },
@@ -75,6 +87,9 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
 
                     adw::ExpanderRow {
                         set_title: "Wine tools",
+                        #[watch]
+                        set_visible: !model.is_native,
+
                         add_row = &adw::ActionRow {
                             set_activatable: true,
                             set_title: "Command line",
@@ -108,23 +123,31 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                     },
 
                     adw::ComboRow {
+                        #[watch]
+                        set_visible: !model.is_native,
                         set_title: "Synchronization",
                         set_subtitle: "Set the synchronization method for wine",
                         set_model: Some(&gtk::StringList::new(&["FSync", "Esync", "None"])),
                     },
 
                     adw::ComboRow {
+                        #[watch]
+                        set_visible: !model.is_native,
                         set_title: "Language",
                         set_subtitle: "Language used in the wine environment. Can fix keyboard layout issues",
                         set_model: Some(&gtk::StringList::new(&["System", "English"]))
                     },
 
                     adw::SwitchRow {
+                        #[watch]
+                        set_visible: !model.is_native,
                         set_title: "Borderless Window",
                         set_active: false
                     },
 
                     adw::ComboRow {
+                        #[watch]
+                        set_visible: !model.is_native,
                         set_title: "Virtual Desktop",
                         set_model: Some(&gtk::StringList::new(&["1920x1080", "1280x720", "1600x900"])),
                         add_suffix = &gtk::Switch {
@@ -134,12 +157,16 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                     },
 
                     adw::SwitchRow {
+                        #[watch]
+                        set_visible: !model.is_native,
                         set_title: "Map drive C:",
                         set_subtitle: "Automatically symlink drive_c folder from the wine prefix to the dosdevices",
                         set_active: true,
                     },
 
                     adw::ComboRow {
+                        #[watch]
+                        set_visible: !model.is_native,
                         set_title: "Map game folder",
                         set_subtitle: "Automatically symlink game folder to the dosdevices",
                         set_model: Some(&gtk::StringList::new(&["a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:", "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:", "y:", "z:"])),
@@ -147,6 +174,22 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                             set_valign: gtk::Align::Center,
                             set_active: true
                         },
+                    },
+
+                    adw::SwitchRow {
+                        #[watch]
+                        set_visible: !model.is_native,
+                        set_title: "Use wine shared libraries",
+                        set_subtitle: "Set LD_LIBRARY_PATH variable to load system libraries from selected wine build",
+                        set_active: true,
+                    },
+
+                    adw::SwitchRow {
+                        #[watch]
+                        set_visible: !model.is_native,
+                        set_title: "Use gstreamer shared libraries",
+                        set_subtitle: "Set GST_PLUGIN_PATH variable to load gstreamer libraries from selected wine build",
+                        set_active: true,
                     },
                 },
 
@@ -252,7 +295,10 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
             window: root.clone(),
             wine_page: ComponentPage::builder().launch(()).detach(),
             dxvk_page: ComponentPage::builder().launch(()).detach(),
-            container_page: ComponentPage::builder().launch(()).detach()
+            container_page: ComponentPage::builder().launch(()).detach(),
+
+            // TODO: Maybe load this from a default config
+            is_native: false,
         };
 
         let widgets = view_output!();
@@ -273,6 +319,9 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
             }
             CreateWineProfileAppMsg::OpenContainerPage => {
                 self.window.push_subpage(self.container_page.widget());
+            }
+            CreateWineProfileAppMsg::SetNative(state) => {
+                self.is_native = state;
             }
         }
     }

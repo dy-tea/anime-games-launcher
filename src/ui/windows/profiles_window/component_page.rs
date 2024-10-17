@@ -4,35 +4,6 @@ use gtk::prelude::*;
 use relm4::{prelude::*, factory::*};
 
 #[derive(Debug)]
-struct ComponentOptions {
-    name: String,
-    subtitle: String,
-    enabled: bool,
-}
-
-#[relm4::factory(async)]
-impl AsyncFactoryComponent for ComponentOptions {
-    type Init = ComponentOptions;
-    type Input = ();
-    type Output = ();
-    type ParentWidget = adw::PreferencesGroup;
-    type CommandOutput = ();
-
-    view! {
-        #[root]
-        adw::SwitchRow {
-            set_title: &self.name,
-            set_subtitle: &self.subtitle,
-            set_active: self.enabled,
-        }
-    }
-
-    async fn init_model(init: Self::Init, index: &DynamicIndex, sender: AsyncFactorySender<Self>) -> Self {
-        init
-    }
-}
-
-#[derive(Debug)]
 struct ComponentVersionsFactory {
     name: String,
     downloaded: bool,
@@ -116,7 +87,6 @@ impl AsyncFactoryComponent for ComponentVersions {
 #[derive(Debug)]
 pub struct ComponentPage {
     name: String,
-    options: AsyncFactoryVecDeque<ComponentOptions>,
     versions: AsyncFactoryVecDeque<ComponentVersions>
 }
 
@@ -159,10 +129,6 @@ impl SimpleAsyncComponent for ComponentPage {
                             }
                         },
 
-                        model.options.widget() {
-                            set_title: "Wine options",
-                        },
-
                         adw::PreferencesGroup {
                             set_title: "Available Versions",
                             model.versions.widget() {
@@ -179,22 +145,9 @@ impl SimpleAsyncComponent for ComponentPage {
     async fn init(init: Self::Init, root: Self::Root, sender: AsyncComponentSender<Self>) -> AsyncComponentParts<Self> {
         let mut model = Self {
             name: String::from("Wine"),
-            options: AsyncFactoryVecDeque::builder().launch_default().detach(),
             versions: AsyncFactoryVecDeque::builder().launch_default().detach()
         };
         let widgets = view_output!();
-
-        model.options.guard().push_back(ComponentOptions {
-            name: String::from("Use wine shared libraries"),
-            subtitle: String::from("Set LD_LIBRARY_PATH variable to load system libraries from selected wine build"),
-            enabled: true,
-        });
-
-        model.options.guard().push_back(ComponentOptions {
-            name: String::from("Use gstreamer shared libraries"),
-            subtitle: String::from("Set GST_PLUGIN_PATH variable to load gstreamer libraries from selected wine build"),
-            enabled: true,
-        });
 
         for _ in 0..5 {
             model.versions.guard().push_back(String::from("Wine-Staging-TkG"));
