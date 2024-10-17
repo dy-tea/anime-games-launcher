@@ -72,9 +72,87 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                         set_activatable: true,
                         connect_activated => CreateWineProfileAppMsg::OpenWinePage,
                     },
+
+                    adw::ExpanderRow {
+                        set_title: "Wine tools",
+                        add_row = &adw::ActionRow {
+                            set_activatable: true,
+                            set_title: "Command line",
+                            set_subtitle: "wineconsole",
+                        },
+                        add_row = &adw::ActionRow {
+                            set_activatable: true,
+                            set_title: "Registry editor",
+                            set_subtitle: "regedit",
+                        },
+                        add_row = &adw::ActionRow {
+                            set_activatable: true,
+                            set_title: "Explorer",
+                            set_subtitle: "explorer",
+                        },
+                        add_row = &adw::ActionRow {
+                            set_activatable: true,
+                            set_title: "Task manager",
+                            set_subtitle: "taskmgr",
+                        },
+                        add_row = &adw::ActionRow {
+                            set_activatable: true,
+                            set_title: "Configuration",
+                            set_subtitle: "winecfg",
+                        },
+                        add_row = &adw::ActionRow {
+                            set_activatable: true,
+                            set_title: "Debugger",
+                            set_subtitle: "start winedbg",
+                        }
+                    },
+
+                    adw::ComboRow {
+                        set_title: "Synchronization",
+                        set_subtitle: "Set the synchronization method for wine",
+                        set_model: Some(&gtk::StringList::new(&["FSync", "Esync", "None"])),
+                    },
+
+                    adw::ComboRow {
+                        set_title: "Language",
+                        set_subtitle: "Language used in the wine environment. Can fix keyboard layout issues",
+                        set_model: Some(&gtk::StringList::new(&["System", "English"]))
+                    },
+
+                    adw::SwitchRow {
+                        set_title: "Borderless Window",
+                        set_active: false
+                    },
+
+                    adw::ComboRow {
+                        set_title: "Virtual Desktop",
+                        set_model: Some(&gtk::StringList::new(&["1920x1080", "1280x720", "1600x900"])),
+                        add_suffix = &gtk::Switch {
+                            set_valign: gtk::Align::Center,
+                            set_active: false
+                        },
+                    },
+
+                    adw::SwitchRow {
+                        set_title: "Map drive C:",
+                        set_subtitle: "Automatically symlink drive_c folder from the wine prefix to the dosdevices",
+                        set_active: true,
+                    },
+
+                    adw::ComboRow {
+                        set_title: "Map game folder",
+                        set_subtitle: "Automatically symlink game folder to the dosdevices",
+                        set_model: Some(&gtk::StringList::new(&["a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:", "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:", "y:", "z:"])),
+                        add_suffix = &gtk::Switch {
+                            set_valign: gtk::Align::Center,
+                            set_active: true
+                        },
+                    },
                 },
 
                 add = &adw::PreferencesGroup {
+                    set_title: "DXVK",
+
                     adw::SwitchRow {
                         set_title: "Use DXVK",
                         set_active: true
@@ -94,6 +172,37 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                 },
 
                 add = &adw::PreferencesGroup {
+                    set_title: "Game",
+
+                    adw::ComboRow {
+                        set_title: "HUD",
+                        set_model: Some(&gtk::StringList::new(&["None", "DXVK", "MangoHud"])),
+                    },
+
+                    adw::ComboRow {
+                        set_title: "FSR",
+                        set_subtitle: "Upscales game to your monitor size. To use select a lower resolution in the game's settings and press Alt+Enter",
+                        set_model: Some(&gtk::StringList::new(&["Ultra Quality", "Quality", "Balanced", "Performance"])),
+                        add_suffix = &gtk::Switch {
+                            set_valign: gtk::Align::Center,
+                            set_active: true
+                        },
+                    },
+
+                    adw::SwitchRow {
+                        set_title: "Gamemode",
+                        set_subtitle: "Prioritize the game over the rest of the processes",
+                    },
+
+                    adw::SwitchRow {
+                        set_title: "Gamescope",
+                        set_subtitle: "Gamescope is tool from Valve that allows you to run games in a separate X session",
+                    }
+                },
+
+                add = &adw::PreferencesGroup {
+                    set_title: "Containerization",
+
                     adw::SwitchRow {
                         set_title: "Use Containerization",
                         set_active: false
@@ -109,6 +218,14 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                         },
                         set_activatable: true,
                         connect_activated => CreateWineProfileAppMsg::OpenDxvkPage,
+                    }
+                },
+
+                add = &adw::PreferencesGroup {
+                    set_title: "Environment",
+
+                    adw::EntryRow {
+                        set_title: "Run command"
                     }
                 },
 
