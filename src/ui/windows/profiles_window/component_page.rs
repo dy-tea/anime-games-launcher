@@ -104,37 +104,26 @@ impl SimpleAsyncComponent for ComponentPage {
             #[wrap(Some)]
             set_child = &gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
-                adw::HeaderBar {
-                    set_show_title: true,
-                    set_show_back_button: true,
-                },
-                gtk::ScrolledWindow {
-                    set_propagate_natural_height: true,
-                    gtk::Box {
-                        set_orientation: gtk::Orientation::Vertical,
-                        set_align: gtk::Align::Center,
-                        set_margin_all: 16,
-                        set_spacing: 16,
-
-                        adw::PreferencesGroup {
-                            adw::ComboRow {
-                                set_title: "Selected version",
-                                set_subtitle: "Select the version of wine you want to use",
-                                set_model: Some(&gtk::StringList::new(&["Wine-Staging-TkG 9.8", "Wine-Staging-TkG 8.1", "Wine-Staging-TkG 8.0"])),
-                            },
-                            adw::SwitchRow {
-                                set_active: true,
-                                set_title: "Recommended only",
-                                set_subtitle: "Show only recommended wine versions"
-                            }
+                adw::HeaderBar,
+                adw::PreferencesPage {
+                    adw::PreferencesGroup {
+                        adw::ComboRow {
+                            set_title: "Selected version",
+                            set_subtitle: "Select the version of wine you want to use",
+                            set_model: Some(&gtk::StringList::new(&["Wine-Staging-TkG 9.8", "Wine-Staging-TkG 8.1", "Wine-Staging-TkG 8.0"])),
                         },
+                        adw::SwitchRow {
+                            set_active: true,
+                            set_title: "Recommended only",
+                            set_subtitle: "Show only recommended wine versions"
+                        }
+                    },
 
-                        adw::PreferencesGroup {
-                            set_title: "Available Versions",
-                            model.versions.widget() {
-                                set_selection_mode: gtk::SelectionMode::None,
-                                add_css_class: "boxed-list"
-                            }
+                    adw::PreferencesGroup {
+                        set_title: "Available Versions",
+                        model.versions.widget() {
+                            set_selection_mode: gtk::SelectionMode::None,
+                            add_css_class: "boxed-list"
                         }
                     }
                 }

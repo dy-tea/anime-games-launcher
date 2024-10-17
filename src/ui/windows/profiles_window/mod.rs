@@ -4,12 +4,16 @@ use relm4::{prelude::*, binding::*};
 pub mod component_page;
 use component_page::*;
 
+pub mod environment_page;
+use environment_page::*;
+
 #[derive(Debug)]
 pub struct CreateWineProfileApp {
     window: adw::PreferencesWindow,
     wine_page: AsyncController<ComponentPage>,
     dxvk_page: AsyncController<ComponentPage>,
     container_page: AsyncController<ComponentPage>,
+    environment_page: AsyncController<EnvironmentPage>,
 
     is_native: bool,
 }
@@ -22,6 +26,7 @@ pub enum CreateWineProfileAppMsg {
     OpenWinePage,
     OpenDxvkPage,
     OpenContainerPage,
+    OpenEnvironmentPage,
 
     SetNative(bool),
 }
@@ -195,6 +200,8 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
 
                 add = &adw::PreferencesGroup {
                     set_title: "DXVK",
+                    #[watch]
+                    set_visible: !model.is_native,
 
                     adw::SwitchRow {
                         set_title: "Use DXVK",
@@ -266,9 +273,19 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
 
                 add = &adw::PreferencesGroup {
                     set_title: "Environment",
+                    set_description: Some("Command used to launch the game. Placeholder %command% is generated automatically by the launcher. For example: gamemoderun '%command%'"),
 
                     adw::EntryRow {
-                        set_title: "Run command"
+                        set_title: "%command%",
+                    },
+
+                    adw::ActionRow {
+                        set_title: "Environment variables",
+                        add_suffix = &gtk::Image {
+                            set_icon_name: Some("go-next-symbolic"),
+                        },
+                        set_activatable: true,
+                        connect_activated => CreateWineProfileAppMsg::OpenEnvironmentPage,
                     }
                 },
 
@@ -296,6 +313,7 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
             wine_page: ComponentPage::builder().launch(()).detach(),
             dxvk_page: ComponentPage::builder().launch(()).detach(),
             container_page: ComponentPage::builder().launch(()).detach(),
+            environment_page: EnvironmentPage::builder().launch(()).detach(),
 
             // TODO: Maybe load this from a default config
             is_native: false,
@@ -319,6 +337,9 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
             }
             CreateWineProfileAppMsg::OpenContainerPage => {
                 self.window.push_subpage(self.container_page.widget());
+            }
+            CreateWineProfileAppMsg::OpenEnvironmentPage => {
+                self.window.push_subpage(self.environment_page.widget());
             }
             CreateWineProfileAppMsg::SetNative(state) => {
                 self.is_native = state;
