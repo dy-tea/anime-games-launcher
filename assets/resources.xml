@@ -39,6 +39,7 @@
     <file preprocess="xml-stripblanks" alias="speedometer2-symbolic.svg">images/icons/speedometer2-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="test-symbolic.svg">images/icons/test-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="loupe-symbolic.svg">images/icons/loupe-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="globe-symbolic.svg">images/icons/globe-symbolic.svg</file>
 
     <!-- Additional icons icons -->
 

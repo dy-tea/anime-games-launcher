@@ -68,14 +68,14 @@ impl AsyncFactoryComponent for CardsList {
 
                 gtk::Box {
                     set_orientation: gtk::Orientation::Horizontal,
-    
+
                     set_spacing: 12,
-    
+
                     self.card.widget() -> &adw::Clamp {
                         set_margin_top: 6,
                         set_margin_bottom: 6
                     },
-    
+
                     gtk::Label {
                         set_label: &self.title
                     }
@@ -194,14 +194,23 @@ impl AsyncFactoryComponent for CardVariantsList {
     view! {
         #[root]
         gtk::ListBoxRow {
-            gtk::Label {
-                set_halign: gtk::Align::Start,
+            gtk::Box {
+                set_orientation: gtk::Orientation::Horizontal,
+                set_spacing: 12,
 
-                set_margin_top: 6,
-                set_margin_bottom: 6,
+                gtk::Image {
+                    set_icon_name: Some("globe-symbolic")
+                },
 
-                #[watch]
-                set_label: &self.title
+                gtk::Label {
+                    set_halign: gtk::Align::Start,
+
+                    set_margin_top: 6,
+                    set_margin_bottom: 6,
+
+                    #[watch]
+                    set_label: &self.title,
+                }
             }
         }
     }
