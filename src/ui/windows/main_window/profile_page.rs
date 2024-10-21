@@ -31,14 +31,14 @@ impl AsyncFactoryComponent for Profile {
 
             add_suffix = &gtk::Button {
                 set_align: gtk::Align::Center,
-                add_css_class: "circular",
+                add_css_class: "flat",
                 set_icon_name: "edit-symbolic",
                 set_tooltip_text: Some("Edit profile"),
             },
 
             add_suffix = &gtk::Button {
                 set_align: gtk::Align::Center,
-                add_css_class: "circular",
+                add_css_class: "flat",
                 set_icon_name: "user-trash-symbolic",
                 set_tooltip_text: Some("Delete profile"),
                 connect_clicked[sender, index] => move |_| {
@@ -105,6 +105,7 @@ impl SimpleAsyncComponent for ProfilePageApp {
             profiles: AsyncFactoryVecDeque::builder().launch_default().forward(sender.input_sender(), std::convert::identity),
         };
 
+        // Test profiles
         let profiles = [
             (String::from("Default"), String::from("Wine-Staging-TkG 9.0 ∙ DXVK 2.1")),
             (String::from("Profile2"), String::from("Wine-Staging-TkG 8.1 ∙ DXVK 1.8")),
@@ -132,6 +133,8 @@ impl SimpleAsyncComponent for ProfilePageApp {
     }
 
     async fn update(&mut self, msg: Self::Input, sender: AsyncComponentSender<Self>) {
+        let mut guard = self.profiles.guard();
+
         match msg {
             ProfilePageAppMsg::New => {
                 self.profile_window = Some(CreateWineProfileApp::builder().launch(()).detach());
@@ -141,11 +144,22 @@ impl SimpleAsyncComponent for ProfilePageApp {
             }
 
             ProfilePageAppMsg::Delete(index) => {
-                self.profiles.guard().remove(index);
+                let active = if let Some(profile) = guard.get(index) {
+                    profile.check_button.is_active()
+                } else { false };
+
+                if guard.len() > 1 {
+                    guard.remove(index);
+
+                    // Set the first profile as default if the deleted profile was the default one
+                    if active {
+                        sender.input(ProfilePageAppMsg::SetDefault(0));
+                    }
+                }
             }
 
             ProfilePageAppMsg::SetDefault(index) => {
-                if let Some(profile) = self.profiles.guard().get(index) {
+                if let Some(profile) = guard.get(index) {
                     profile.check_button.set_active(true);
                 }
             }
