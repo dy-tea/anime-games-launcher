@@ -107,7 +107,7 @@ impl SimpleAsyncComponent for EnvironmentPage {
 
     async fn init(init: Self::Init, root: Self::Root, sender: AsyncComponentSender<Self>) -> AsyncComponentParts<Self> {
         let model = Self {
-            variables: AsyncFactoryVecDeque::builder().launch_default().detach(),
+            variables: AsyncFactoryVecDeque::builder().launch_default().forward(sender.input_sender(), std::convert::identity),
             name_entry: adw::EntryRow::new(),
             value_entry: adw::EntryRow::new(),
         };
