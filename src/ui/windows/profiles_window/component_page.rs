@@ -3,6 +3,7 @@ use gtk::prelude::*;
 
 use relm4::{prelude::*, factory::*};
 
+/*
 #[derive(Debug)]
 struct ComponentVersionsFactory {
     name: String,
@@ -34,45 +35,90 @@ impl AsyncFactoryComponent for ComponentVersionsFactory {
         init
     }
 }
+*/
 
-#[derive(Debug)]
-struct ComponentVersions {
+#[derive(Debug, Clone)]
+struct ComponentVersionsRow {
     name: String,
-    versions: AsyncFactoryVecDeque<ComponentVersionsFactory>,
+    downloaded: bool,
 }
 
-#[relm4::factory(async)]
-impl AsyncFactoryComponent for ComponentVersions {
-    type Init = String;
+#[relm4::component(async)]
+impl SimpleAsyncComponent for ComponentVersionsRow {
+    type Init = ComponentVersionsRow;
     type Input = ();
     type Output = ();
-    type ParentWidget = gtk::ListBox;
-    type CommandOutput = ();
 
     view! {
         #[root]
-        gtk::ListBoxRow { // TODO: Fix this abomination, ideally we should not have this line
-            self.versions.widget() {
-                set_title: &self.name,
+        adw::ActionRow {
+            set_title: &model.name,
+            add_suffix = &gtk::Button {
+                add_css_class: "flat",
+                #[watch]
+                set_icon_name: if model.downloaded {"user-trash-symbolic"} else {"download-symbolic"},
+                set_align: gtk::Align::Center
             }
         }
     }
 
-    async fn init_model(init: Self::Init, _index: &DynamicIndex, _sender: AsyncFactorySender<Self>) -> Self {
-        let mut versions: AsyncFactoryVecDeque<ComponentVersionsFactory> = AsyncFactoryVecDeque::builder().launch_default().detach();
+    async fn init(init: Self::Init, root: Self::Root, sender: AsyncComponentSender<Self>) -> AsyncComponentParts<Self> {
+        let model = init;
+        let widgets = view_output!();
 
-        versions.guard().push_back(ComponentVersionsFactory {
+        AsyncComponentParts { model, widgets }
+    }
+}
+
+#[derive(Debug)]
+struct ComponentVersions {
+    name: String,
+    // Cursed?
+    versions: Vec<ComponentVersionsRow>,
+}
+
+impl AsyncFactoryComponent for ComponentVersions {
+    type Init = String;
+    type Input = ();
+    type Output = ();
+    type Root = adw::ExpanderRow;
+    type Widgets = ();
+    type ParentWidget = adw::PreferencesGroup;
+    type CommandOutput = ();
+
+    fn init_root() -> Self::Root {
+        adw::ExpanderRow::new()
+    }
+
+    fn init_widgets(
+        &mut self,
+        index: &DynamicIndex,
+        root: Self::Root,
+        returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
+        sender: AsyncFactorySender<Self>,
+    ) -> Self::Widgets {
+        root.set_title(&self.name);
+
+        for row in self.versions.clone() {
+            root.add_row(ComponentVersionsRow::builder().launch(row).detach().widget());
+        }
+    }
+
+    async fn init_model(init: Self::Init, _index: &DynamicIndex, _sender: AsyncFactorySender<Self>) -> Self {
+        let mut versions: Vec<ComponentVersionsRow> = Vec::new();
+
+        versions.push(ComponentVersionsRow {
             name: "Wine-Staging-TkG 9.8".to_string(),
             downloaded: true,
         });
 
-        versions.guard().push_back(ComponentVersionsFactory {
+        versions.push(ComponentVersionsRow {
             name: "Wine-Staging-TkG 9.1".to_string(),
             downloaded: false,
         });
 
 
-        versions.guard().push_back(ComponentVersionsFactory {
+        versions.push(ComponentVersionsRow {
             name: "Wine-Staging-TkG 8.0".to_string(),
             downloaded: false,
         });
@@ -119,12 +165,8 @@ impl SimpleAsyncComponent for ComponentPage {
                         }
                     },
 
-                    adw::PreferencesGroup {
+                    model.versions.widget() {
                         set_title: "Available Versions",
-                        model.versions.widget() {
-                            set_selection_mode: gtk::SelectionMode::None,
-                            add_css_class: "boxed-list"
-                        }
                     }
                 }
             }
