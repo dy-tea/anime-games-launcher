@@ -31,14 +31,14 @@ impl AsyncFactoryComponent for Profile {
 
             add_suffix = &gtk::Button {
                 set_align: gtk::Align::Center,
-                add_css_class: "flat",
+                add_css_class: "circular",
                 set_icon_name: "edit-symbolic",
                 set_tooltip_text: Some("Edit profile"),
             },
 
             add_suffix = &gtk::Button {
                 set_align: gtk::Align::Center,
-                add_css_class: "flat",
+                add_css_class: "circular",
                 set_icon_name: "user-trash-symbolic",
                 set_tooltip_text: Some("Delete profile"),
                 connect_clicked[sender, index] => move |_| {

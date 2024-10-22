@@ -54,7 +54,7 @@ impl SimpleAsyncComponent for ComponentVersionsRow {
         adw::ActionRow {
             set_title: &model.name,
             add_suffix = &gtk::Button {
-                add_css_class: "flat",
+                add_css_class: "circular",
                 #[watch]
                 set_icon_name: if model.downloaded {"user-trash-symbolic"} else {"download-symbolic"},
                 set_align: gtk::Align::Center
