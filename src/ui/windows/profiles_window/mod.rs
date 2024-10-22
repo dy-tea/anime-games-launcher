@@ -1,11 +1,22 @@
 use adw::prelude::*;
-use relm4::{prelude::*, binding::*};
+use relm4::prelude::*;
 
 pub mod component_page;
 use component_page::*;
 
 pub mod environment_page;
 use environment_page::*;
+
+#[relm4::widget_template(pub)]
+impl WidgetTemplate for ComboSwitchRow {
+    view! {
+        adw::ComboRow {
+            add_suffix = &gtk::Switch {
+                set_valign: gtk::Align::Center
+            }
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct CreateWineProfileApp {
@@ -57,6 +68,7 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                     adw::EntryRow {
                         set_title: "Profile name"
                     },
+
                     adw::SwitchRow {
                         set_title: "Set default",
                         set_subtitle: "Use this profile by default with newly installed games"
@@ -127,12 +139,13 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                         }
                     },
 
-                    adw::ComboRow {
+                    #[template]
+                    ComboSwitchRow {
                         #[watch]
                         set_visible: !model.is_native,
                         set_title: "Synchronization",
                         set_subtitle: "Set the synchronization method for wine",
-                        set_model: Some(&gtk::StringList::new(&["FSync", "Esync", "None"])),
+                        set_model: Some(&gtk::StringList::new(&["FSync", "Esync"])),
                     },
 
                     adw::ComboRow {
@@ -150,15 +163,12 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                         set_active: false
                     },
 
-                    adw::ComboRow {
+                    #[template]
+                    ComboSwitchRow {
                         #[watch]
                         set_visible: !model.is_native,
                         set_title: "Virtual Desktop",
                         set_model: Some(&gtk::StringList::new(&["1920x1080", "1280x720", "1600x900"])),
-                        add_suffix = &gtk::Switch {
-                            set_valign: gtk::Align::Center,
-                            set_active: false
-                        },
                     },
 
                     adw::SwitchRow {
@@ -169,16 +179,13 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                         set_active: true,
                     },
 
-                    adw::ComboRow {
+                    #[template]
+                    ComboSwitchRow {
                         #[watch]
                         set_visible: !model.is_native,
                         set_title: "Map game folder",
                         set_subtitle: "Automatically symlink game folder to the dosdevices",
                         set_model: Some(&gtk::StringList::new(&["a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:", "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:", "y:", "z:"])),
-                        add_suffix = &gtk::Switch {
-                            set_valign: gtk::Align::Center,
-                            set_active: true
-                        },
                     },
 
                     adw::SwitchRow {
@@ -224,19 +231,17 @@ impl SimpleAsyncComponent for CreateWineProfileApp {
                 add = &adw::PreferencesGroup {
                     set_title: "Game",
 
-                    adw::ComboRow {
+                    #[template]
+                    ComboSwitchRow {
                         set_title: "HUD",
-                        set_model: Some(&gtk::StringList::new(&["None", "DXVK", "MangoHud"])),
+                        set_model: Some(&gtk::StringList::new(&["DXVK", "MangoHud"])),
                     },
 
-                    adw::ComboRow {
+                    #[template]
+                    ComboSwitchRow {
                         set_title: "FSR",
                         set_subtitle: "Upscales game to your monitor size. To use select a lower resolution in the game's settings and press Alt+Enter",
                         set_model: Some(&gtk::StringList::new(&["Ultra Quality", "Quality", "Balanced", "Performance"])),
-                        add_suffix = &gtk::Switch {
-                            set_valign: gtk::Align::Center,
-                            set_active: true
-                        },
                     },
 
                     adw::SwitchRow {
